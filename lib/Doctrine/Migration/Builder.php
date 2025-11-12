@@ -146,8 +146,8 @@ END;
     {
         $changes = $diff->generateChanges();
 
-        $up = array();
-        $down = array();
+        $up = [];
+        $down = [];
 
         if ( ! empty($changes['dropped_tables'])) {
             foreach ($changes['dropped_tables'] as $tableName => $table) {
@@ -192,12 +192,12 @@ END;
         if ( ! empty($up) || ! empty($down)) {
             $up = implode("\n", $up);
             $down = implode("\n", $down);
-            $className = 'Version' . $this->migration->getNextMigrationClassVersion();
-            $this->generateMigrationClass($className, array(), $up, $down);
+            $className = 'Dev_Version' . $this->migration->getNextMigrationClassVersion();
+            $this->generateMigrationClass($className, [], $up, $down);
         }
 
-        $up = array();
-        $down = array();
+        $up = [];
+        $down = [];
         if ( ! empty($changes['dropped_foreign_keys'])) {
             foreach ($changes['dropped_foreign_keys'] as $tableName => $droppedFks) {
                 if ( ! empty($changes['dropped_tables']) && isset($changes['dropped_tables'][$tableName])) { 
@@ -256,8 +256,8 @@ END;
         if ( ! empty($up) || ! empty($down)) {
             $up = implode("\n", $up);
             $down = implode("\n", $down);
-            $className = 'Version' . $this->migration->getNextMigrationClassVersion();
-            $this->generateMigrationClass($className, array(), $up, $down);
+            $className = 'Dev_Version' . $this->migration->getNextMigrationClassVersion();
+            $this->generateMigrationClass($className, [], $up, $down);
         }
         return $changes;
     }
@@ -297,7 +297,7 @@ END;
 
         $models = Doctrine_Core::initializeModels($models);
 
-        $foreignKeys = array();
+        $foreignKeys = [];
 
         foreach ($models as $model) {
             $table = Doctrine_Core::getTable($model);
@@ -311,17 +311,17 @@ END;
 
                 $className = 'Add' . Doctrine_Inflector::classify($export['tableName']);
 
-                $this->generateMigrationClass($className, array(), $up, $down);
+                $this->generateMigrationClass($className, [], $up, $down);
             }
         }
 
         if ( ! empty($foreignKeys)) {
             $className = 'AddFks';
 
-            $up = array();
-            $down = array();
-            foreach ($foreignKeys as $tableName => $definitions)    {
-                $tableForeignKeyNames[$tableName] = array();
+            $up = [];
+            $down = [];
+            foreach ($foreignKeys as $tableName => $definitions) {
+                $tableForeignKeyNames[$tableName] = [];
 
                 foreach ($definitions as $definition) {
                     $up[] = $this->buildCreateForeignKey($tableName, $definition);
@@ -332,7 +332,7 @@ END;
             $up = implode("\n", $up);
             $down = implode("\n", $down);
             if ($up || $down) {
-                $this->generateMigrationClass($className, array(), $up, $down);
+                $this->generateMigrationClass($className, [], $up, $down);
             }
         }
 
@@ -375,9 +375,9 @@ END;
 
         $code .= $this->varExport($tableData['columns'], true) . ", ";
 
-        $optionsWeNeed = array('type', 'indexes', 'primary', 'collate', 'charset');
+        $optionsWeNeed = ['type', 'indexes', 'primary', 'collate', 'charset'];
 
-        $options = array();
+        $options = [];
         foreach ($optionsWeNeed as $option) {
             if (isset($tableData['options'][$option])) {
                 $options[$option] = $tableData['options'][$option];
@@ -415,7 +415,7 @@ END;
         $length = $column['length'];
         $type = $column['type'];
         unset($column['length'], $column['type']);
-        return "        \$this->addColumn('" . $tableName . "', '" . $columnName. "', '" . $type . "', '" . $length . "', " . $this->varExport($column) . ");";
+        return "        \$this->addColumn('" . $tableName . "', '" . $columnName . "', '" . $type . "', '" . $length . "', " . $this->varExport($column) . ");";
     }
 
     /**
@@ -428,7 +428,7 @@ END;
      */
     public function buildRemoveColumn($tableName, $columnName, $column)
     {
-        return "        \$this->removeColumn('" . $tableName . "', '" . $columnName. "');";
+        return "        \$this->removeColumn('" . $tableName . "', '" . $columnName . "');";
     }
 
     /**
@@ -444,7 +444,7 @@ END;
         $length = $column['length'];
         $type = $column['type'];
         unset($column['length'], $column['type']);
-        return "        \$this->changeColumn('" . $tableName . "', '" . $columnName. "', '" . $type . "', '" . $length . "', " . $this->varExport($column) . ");";
+        return "        \$this->changeColumn('" . $tableName . "', '" . $columnName . "', '" . $type . "', '" . $length . "', " . $this->varExport($column) . ");";
     }
 
     /**
@@ -484,7 +484,7 @@ END;
      *                             If true return and false it writes the class to disk.
      * @return mixed
      */
-    public function generateMigrationClass($className, $options = array(), $up = null, $down = null, $return = false)
+    public function generateMigrationClass($className, $options = [], $up = null, $down = null, $return = false)
     {
         $className = Doctrine_Inflector::urlize($className);
         $className = str_replace('-', '_', $className);
@@ -493,13 +493,13 @@ END;
         if ($return || ! $this->getMigrationsPath()) {
             return $this->buildMigrationClass($className, null, $options, $up, $down);
         } else {
-            if ( ! $this->getMigrationsPath()) {
+            if (! $this->getMigrationsPath()) {
                 throw new Doctrine_Migration_Exception('You must specify the path to your migrations.');
             }
 
-            $next = time() + $this->migration->getNextMigrationClassVersion();
-            $fileName = $next . '_' . Doctrine_Inflector::tableize($className) . $this->suffix;
-
+            //$next = time() + $this->migration->getNextMigrationClassVersion();
+            //$fileName = $next . '_' . Doctrine_Inflector::tableize($className) . $this->suffix;
+            $fileName = Doctrine_Inflector::tableize($className) . $this->suffix;
             $class = $this->buildMigrationClass($className, $fileName, $options, $up, $down);
 
             $path = $this->getMigrationsPath() . DIRECTORY_SEPARATOR . $fileName;
@@ -526,16 +526,19 @@ END;
      * @param string  $down        The code for the down function
      * @return string $content     The code for the generated class
      */
-    public function buildMigrationClass($className, $fileName = null, $options = array(), $up = null, $down = null)
+    public function buildMigrationClass($className, $fileName = null, $options = [], $up = null, $down = null)
     {
-        $extends = isset($options['extends']) ? $options['extends']:'Doctrine_Migration_Base';
+        $extends = isset($options['extends']) ? $options['extends']:'SkipsoMigrationBase';
 
         $content  = '<?php' . PHP_EOL;
 
-        $content .= sprintf(self::$tpl, $className,
-                                       $extends,
-                                       $up,
-                                       $down);
+        $content .= sprintf(
+            self::$tpl,
+            $className,
+            $extends,
+            $up,
+            $down
+        );
 
         return $content;
     }
