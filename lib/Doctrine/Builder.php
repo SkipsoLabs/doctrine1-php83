@@ -49,11 +49,10 @@ class Doctrine_Builder
         }
         $export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
         $export = str_replace('  ', ' ', $export);
+        // Safety net: ensure any remaining array() syntax is converted to []
         $export = str_replace('array (', '[', $export);
-        $export = str_replace('array( ', '[', $export);
-        $export = str_replace(',)', ')', $export);
-        $export = str_replace(', )', ')', $export);
-        $export = str_replace('  ', ' ', $export);
+        $export = str_replace('array(', '[', $export);
+        $export = str_replace(',]', ']', $export);
 
         return $export;
     }
@@ -72,7 +71,9 @@ class Doctrine_Builder
         $export = var_export($expression, true);
         $patterns = [
             "/array \(/" => '[',
+            "/array\(/" => '[',
             "/^([ ]*)\)(,?)$/m" => '$1]$2',
+            "/\)(,?)(\s*)$/" => ']$1$2',
             "/=>[ ]?\n[ ]+\[/" => '=> [',
             "/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
         ];
