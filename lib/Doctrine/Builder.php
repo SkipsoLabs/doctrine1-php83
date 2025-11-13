@@ -71,9 +71,6 @@ class Doctrine_Builder
             "/=>[ ]?\n[ ]+\[/" => '=> [',    // format => \n[ -> => [
         ];
         $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
-
-        // Clean up spacing
-        $export = str_replace('  ', ' ', $export);
         // AI-generated: END
 
         return $export;
