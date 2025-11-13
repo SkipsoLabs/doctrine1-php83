@@ -50,7 +50,11 @@ class Doctrine_Builder
     }
 
     /**
-    * PHP var_export() with short array syntax (square brackets) indented 2 spaces.
+    * PHP var_export() wrapper - uses native output to preserve data integrity
+    *
+    * Previous attempts to convert array() to [] syntax using regex caused data corruption
+    * when strings contained patterns like 'array (' or '=> \n  ['.
+    * Safety over syntax preference - this preserves all string content correctly.
     *
     * @link https://www.php.net/manual/en/function.var-export.php
     *
@@ -59,20 +63,6 @@ class Doctrine_Builder
     */
     public function varExportForArray(array $expression): string
     {
-        $export = var_export($expression, true);
-
-        // AI-generated: START - Convert array() to [] syntax @dev: Marco Grossi
-        // Use regex patterns that preserve string content and only modify structure
-        $patterns = [
-            "/\barray \(/" => '[',           // array ( -> [
-            "/\barray\(/" => '[',             // array( -> [
-            "/^([ ]*)\)(,?)$/m" => '$1]$2',  // closing ) at end of line -> ]
-            "/\)(,?)(\s*)$/" => ']$1$2',     // closing ) at end of string -> ]
-            "/=>[ ]?\n[ ]+\[/" => '=> [',    // format => \n[ -> => [
-        ];
-        $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
-        // AI-generated: END
-
-        return $export;
+        return var_export($expression, true);
     }
 }
