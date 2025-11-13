@@ -43,7 +43,15 @@ class Doctrine_Builder
     public function varExport($var)
     {
         if (is_array($var)) {
-            return $this->varExportForArray($var);
+            $export = $this->varExportForArray($var);
+
+            // AI-generated: START - Add indentation for inline arrays in model files @dev: Marco Grossi
+            // Model arrays appear inline with method calls and need proper spacing
+            // Regex matches: newline + spaces (structural lines) to add 10 extra spaces
+            $export = preg_replace('/\n( *)/', "\n" . str_repeat(' ', 10) . '$1', $export);
+            // AI-generated: END
+
+            return $export;
         } else {
             return var_export($var, true);
         }

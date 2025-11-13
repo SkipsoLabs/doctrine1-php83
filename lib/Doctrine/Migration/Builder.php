@@ -533,10 +533,9 @@ END;
             $export = $this->varExportForArray($var);
 
             // AI-generated: START - Add indentation for migration inline arrays @dev: Marco Grossi
-            // Only add spaces to lines that start with existing indentation (structural lines)
-            // This regex matches: newline + 1 or more spaces at start of line
-            // Lines without leading spaces (like middle of multi-line strings) are NOT matched
-            $export = preg_replace('/\n( +)/', "\n" . str_repeat(' ', 8) . '$1', $export);
+            // Migration arrays appear inline with method calls and need extra spacing
+            // Regex matches: newline + zero or more spaces (including closing bracket lines)
+            $export = preg_replace('/\n( *)/', "\n" . str_repeat(' ', 8) . '$1', $export);
             // AI-generated: END
 
             return $export;
