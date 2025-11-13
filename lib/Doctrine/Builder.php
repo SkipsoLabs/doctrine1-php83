@@ -42,15 +42,41 @@ class Doctrine_Builder
      */
     public function varExport($var)
     {
-        $export = var_export($var, true);
+        if (is_array($var)) {
+            $export = $this->varExportForArray($var);
+        } else {
+            $export = var_export($var, true);
+        }
         $export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
         $export = str_replace('  ', ' ', $export);
-        $export = str_replace('array (', 'array(', $export);
-        $export = str_replace('array( ', 'array(', $export);
+        $export = str_replace('array (', '[', $export);
+        $export = str_replace('array( ', '[', $export);
         $export = str_replace(',)', ')', $export);
         $export = str_replace(', )', ')', $export);
         $export = str_replace('  ', ' ', $export);
 
+        return $export;
+    }
+
+    /**
+    * PHP var_export() with short array syntax (square brackets) indented 2 spaces.
+    *
+    * NOTE: The only issue is when a string value has `=>\n[`, it will get converted to `=> [`
+    * @link https://www.php.net/manual/en/function.var-export.php
+    *
+    * @param array $expression
+    * @return string the variable representation
+    */
+    public function varExportForArray(array $expression): string
+    {
+        $export = var_export($expression, true);
+        $patterns = [
+            "/array \(/" => '[',
+            "/^([ ]*)\)(,?)$/m" => '$1]$2',
+            "/=>[ ]?\n[ ]+\[/" => '=> [',
+            "/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
+        ];
+        $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
         return $export;
     }
 }
