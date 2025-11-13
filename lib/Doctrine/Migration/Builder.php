@@ -521,6 +521,31 @@ END;
     }
 
     /**
+     * Override varExport to add extra indentation for migration files
+     * Migration arrays appear inline with method calls and need extra spacing
+     *
+     * @param mixed $var Variable to export
+     * @return string Formatted output with extra indentation
+     */
+    public function varExport($var)
+    {
+        if (is_array($var)) {
+            $export = $this->varExportForArray($var);
+
+            // AI-generated: START - Add indentation for migration inline arrays @dev: Marco Grossi
+            // Only add spaces to lines that start with existing indentation (structural lines)
+            // This regex matches: newline + 1 or more spaces at start of line
+            // Lines without leading spaces (like middle of multi-line strings) are NOT matched
+            $export = preg_replace('/\n( +)/', "\n" . str_repeat(' ', 8) . '$1', $export);
+            // AI-generated: END
+
+            return $export;
+        } else {
+            return var_export($var, true);
+        }
+    }
+
+    /**
      * Build the code for a migration class
      *
      * @param string  $className   Class name to generate
