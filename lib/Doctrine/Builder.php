@@ -43,20 +43,15 @@ class Doctrine_Builder
     public function varExport($var)
     {
         if (is_array($var)) {
-            $export = $this->varExportForArray($var);
+            return $this->varExportForArray($var);
         } else {
-            $export = var_export($var, true);
+            return var_export($var, true);
         }
-        $export = str_replace("\n", PHP_EOL . str_repeat(' ', 12), $export);
-        $export = str_replace('  ', ' ', $export);
-
-        return $export;
     }
 
     /**
     * PHP var_export() with short array syntax (square brackets) indented 2 spaces.
     *
-    * NOTE: The only issue is when a string value has `=>\n[`, it will get converted to `=> [`
     * @link https://www.php.net/manual/en/function.var-export.php
     *
     * @param array $expression
@@ -65,15 +60,21 @@ class Doctrine_Builder
     public function varExportForArray(array $expression): string
     {
         $export = var_export($expression, true);
+
+        // AI-generated: START - Convert array() to [] syntax @dev: Marco Grossi
+        // Use regex patterns that preserve string content and only modify structure
         $patterns = [
-            "/array \(/" => '[',
-            "/array\(/" => '[',
-            "/^([ ]*)\)(,?)$/m" => '$1]$2',
-            "/\)(,?)(\s*)$/" => ']$1$2',
-            "/=>[ ]?\n[ ]+\[/" => '=> [',
-            "/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
+            "/\barray \(/" => '[',           // array ( -> [
+            "/\barray\(/" => '[',             // array( -> [
+            "/^([ ]*)\)(,?)$/m" => '$1]$2',  // closing ) at end of line -> ]
+            "/\)(,?)(\s*)$/" => ']$1$2',     // closing ) at end of string -> ]
+            "/=>[ ]?\n[ ]+\[/" => '=> [',    // format => \n[ -> => [
         ];
         $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
+
+        // Clean up spacing
+        $export = str_replace('  ', ' ', $export);
+        // AI-generated: END
 
         return $export;
     }
