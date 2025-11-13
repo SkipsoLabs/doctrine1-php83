@@ -75,13 +75,6 @@ class Doctrine_Builder
         ];
         $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
 
-        // AI-generated: START - Safety net for any remaining array syntax @dev: Marco Grossi
-        // Apply as final step only on arrays to catch any edge cases regex might miss
-        $export = str_replace('array (', '[', $export);
-        $export = str_replace('array(', '[', $export);
-        $export = str_replace(',]', ']', $export);
-        // AI-generated: END
-
         return $export;
     }
 }
