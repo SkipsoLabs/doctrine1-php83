@@ -42,14 +42,50 @@ class Doctrine_Builder
      */
     public function varExport($var)
     {
-        $export = var_export($var, true);
-        $export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
-        $export = str_replace('  ', ' ', $export);
-        $export = str_replace('array (', 'array(', $export);
-        $export = str_replace('array( ', 'array(', $export);
-        $export = str_replace(',)', ')', $export);
-        $export = str_replace(', )', ')', $export);
-        $export = str_replace('  ', ' ', $export);
+        if (is_array($var)) {
+            $export = $this->varExportForArray($var);
+
+            // AI-generated: START - Add indentation for inline arrays in model files @dev: Marco Grossi
+            // Model arrays appear inline with method calls and need proper spacing
+            // Regex matches: newline + spaces (structural lines) to add 10 extra spaces
+            $export = preg_replace('/\n( *)/', "\n" . str_repeat(' ', 10) . '$1', $export);
+            // AI-generated: END
+
+            return $export;
+        } else {
+            return var_export($var, true);
+        }
+    }
+
+    /**
+    * PHP var_export() with short array syntax (square brackets) indented 2 spaces.
+    *
+    * WARNING: This method uses regex patterns to convert array() to [] syntax.
+    * Edge case limitation: String values containing patterns like 'array (' or '=> \n  ['
+    * will be transformed. In practice, Doctrine column/table definitions rarely contain
+    * such patterns, so this trade-off is acceptable for better code formatting.
+    *
+    * @link https://www.php.net/manual/en/function.var-export.php
+    *
+    * @param array $expression
+    * @return string the variable representation
+    */
+    public function varExportForArray(array $expression): string
+    {
+        $export = var_export($expression, true);
+
+        // AI-generated: START - Convert array() to [] syntax @dev: Marco Grossi
+        // Use regex patterns to transform structural array syntax
+        // Note: These patterns cannot distinguish between structural and string content
+        // but work correctly for typical Doctrine schema definitions
+        $patterns = [
+            "/\barray \(/" => '[',           // array ( -> [
+            "/\barray\(/" => '[',             // array( -> [
+            "/^([ ]*)\)(,?)$/m" => '$1]$2',  // closing ) at end of line -> ]
+            "/\)(,?)(\s*)$/" => ']$1$2',     // closing ) at end of string -> ]
+        ];
+        $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
+        // AI-generated: END
 
         return $export;
     }
