@@ -49,10 +49,6 @@ class Doctrine_Builder
         }
         $export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
         $export = str_replace('  ', ' ', $export);
-        // Safety net: ensure any remaining array() syntax is converted to []
-        $export = str_replace('array (', '[', $export);
-        $export = str_replace('array(', '[', $export);
-        $export = str_replace(',]', ']', $export);
 
         return $export;
     }
@@ -78,6 +74,14 @@ class Doctrine_Builder
             "/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
         ];
         $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
+
+        // AI-generated: START - Safety net for any remaining array syntax @dev: Marco Grossi
+        // Apply as final step only on arrays to catch any edge cases regex might miss
+        $export = str_replace('array (', '[', $export);
+        $export = str_replace('array(', '[', $export);
+        $export = str_replace(',]', ']', $export);
+        // AI-generated: END
+
         return $export;
     }
 }
