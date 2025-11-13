@@ -352,7 +352,7 @@ END;
      */
     public function buildCreateForeignKey($tableName, $definition)
     {
-        return "        \$this->createForeignKey('" . $tableName . "', '" . $definition['name'] . "', " . $this->varExport($definition, true) . ");";
+        return "        \$this->tryToCreateForeignKey('" . $tableName . "', '" . $definition['name'] . "', " . $this->varExport($definition, true) . ");";
     }
 
     /**
@@ -364,7 +364,7 @@ END;
      */
     public function buildDropForeignKey($tableName, $definition)
     {
-        return "        \$this->dropForeignKey('" . $tableName . "', '" . $definition['name'] . "');";
+        return "        \$this->dropForeignKeyIfExists('" . $tableName . "', '" . $definition['name'] . "');";
     }
 
     /**
@@ -461,7 +461,7 @@ END;
      */
     public function buildAddIndex($tableName, $indexName, $index)
     {
-        return "        \$this->addIndex('$tableName', '$indexName', " . $this->varExport($index) . ");";
+        return "        \$this->tryToAddIndex('$tableName', '$indexName', " . $this->varExport($index) . ");";
     }
 
     /**
@@ -474,7 +474,7 @@ END;
      */
     public function buildRemoveIndex($tableName, $indexName, $index)
     {
-        return "        \$this->removeIndex('$tableName', '$indexName', " . $this->varExport($index) . ");";
+        return "        \$this->removeIndexIfExists('$tableName', '$indexName', " . $this->varExport($index) . ");";
     }
 
     /**
